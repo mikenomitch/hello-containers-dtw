@@ -30,23 +30,29 @@ export default {
     // To route requests to a specific container,
     // pass a unique container identifier to .get()
     if (pathname.startsWith('/container')) {
-      let id = env.MY_CONTAINER.idFromName('container');
-      let container = env.MY_CONTAINER.get(id);
+      const containerId = pathname.split('/')[2]; // Assumes format is always /container/<id>
+
+      // Create a unique name like 'container-abc123'
+      const uniqueName = `container-${containerId}`;
+
+      // Get Durable Object ID from the unique name
+      const id = env.MY_CONTAINER.idFromName(uniqueName);
+      const container = env.MY_CONTAINER.get(id);
       return await container.fetch(request);
     }
 
     // This route forces a panic in the container.
     // This will cause the onError hook to run
     if (pathname.startsWith('/error')) {
-      let id = env.MY_CONTAINER.idFromName('error-test');
-      let container = env.MY_CONTAINER.get(id);
+      const id = env.MY_CONTAINER.idFromName('error-test');
+      const container = env.MY_CONTAINER.get(id);
       return await container.fetch(request);
     }
 
     // This route uses the loadBalance helper to route
     // requests to one of 3 containers
     if (pathname.startsWith('/lb')) {
-      let container = await loadBalance(env.MY_CONTAINER, 3);
+      const container = await loadBalance(env.MY_CONTAINER, 3);
       return await container.fetch(request);
     }
 
